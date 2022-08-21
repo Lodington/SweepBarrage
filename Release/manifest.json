@@ -1,0 +1,11 @@
+{
+    "name": "AutoShot",
+    "version_number": "1.0.2",
+    "website_url": "",
+    "description": "Adds a new Skill Called Auto Shot to Commando!",
+    "dependencies": [
+        "tristanmcpherson-R2API-2.5.14",
+        "bbepis-BepInExPack-5.3.1"
+
+    ]
+}
