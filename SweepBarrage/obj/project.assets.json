@@ -2933,18 +2933,18 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "B:\\C#Projects\\SweepBarrage\\SweepBarrage\\AutoShot.csproj",
+      "projectUniqueName": "C:\\Users\\tyler\\RiderProjects\\SweepBarrage\\SweepBarrage\\AutoShot.csproj",
       "projectName": "AutoShot",
-      "projectPath": "B:\\C#Projects\\SweepBarrage\\SweepBarrage\\AutoShot.csproj",
+      "projectPath": "C:\\Users\\tyler\\RiderProjects\\SweepBarrage\\SweepBarrage\\AutoShot.csproj",
       "packagesPath": "C:\\Users\\tyler\\.nuget\\packages\\",
-      "outputPath": "B:\\C#Projects\\SweepBarrage\\SweepBarrage\\obj\\",
+      "outputPath": "C:\\Users\\tyler\\RiderProjects\\SweepBarrage\\SweepBarrage\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\DevExpress 21.2\\Components\\Offline Packages",
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "B:\\C#Projects\\SweepBarrage\\NuGet.Config",
+        "C:\\Users\\tyler\\RiderProjects\\SweepBarrage\\NuGet.Config",
         "C:\\Users\\tyler\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\DevExpress 20.1.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\DevExpress 21.2.config",

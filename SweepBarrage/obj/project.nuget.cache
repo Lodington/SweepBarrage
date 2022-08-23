@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Vq/xR+uyy2w+tyz15yfGqZw73fCxN/JqUpAXHcoo+lRL3lMEwquMDAa670Y/XM19Rf+FTwtwx1ssqQ6bQyrTrw==",
+  "dgSpecHash": "O20jHcKS/+bN3gEk1bIFm7Um1F/67U538WzTnzXIKtFp1OAQwLdS8VGStT4hFMWdQI8fFlgmRHir3/W838xicw==",
   "success": true,
-  "projectFilePath": "B:\\C#Projects\\SweepBarrage\\SweepBarrage\\AutoShot.csproj",
+  "projectFilePath": "C:\\Users\\tyler\\RiderProjects\\SweepBarrage\\SweepBarrage\\AutoShot.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\tyler\\.nuget\\packages\\bepinex.baselib\\5.4.19\\bepinex.baselib.5.4.19.nupkg.sha512",
     "C:\\Users\\tyler\\.nuget\\packages\\bepinex.core\\5.4.19\\bepinex.core.5.4.19.nupkg.sha512",

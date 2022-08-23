@@ -120,9 +120,8 @@ namespace AutoShot
 		[MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
 		private void ScepterSetup()
 		{
-			bool test = ClassicItems.Scepter_V2.instance.RegisterScepterSkill(AUTO_SHOT_SCEPTER, "CommandoBody", SkillSlot.Special, 2);
-			bool ThinkInvisible.ClassicItems.Scepter.instance.RegisterScepterSkill(AUTO_SHOT_SCEPTER, "CommandoBody",
-				SkillSlot.Special, 2);
+			ThinkInvisible.ClassicItems.Scepter.instance.RegisterScepterSkill(AUTO_SHOT_SCEPTER, "CommandoBody",
+				SkillSlot.Special, AUTO_SHOT);
 		}
 		
 	}
