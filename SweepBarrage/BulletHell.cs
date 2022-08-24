@@ -12,103 +12,100 @@ namespace AutoShot
 {
     class BulletHell : BaseState
     {
-        public float baseDuration = 1.3f;
-        private float duration;
-        private float fireTimer;
-        public float timeBetweenBullets;
-        private float firingDuration;
-        public static float fieldOfView = float.MaxValue;
-        public float maxDistance = float.MaxValue;
+        private float baseDuration = 1.3f;
+        private float _duration;
+        private float _fireTimer;
+        private float _timeBetweenBullets;
+        private float _firingDuration;
+        private static float _fieldOfView = float.MaxValue;
+        private float maxDistance = float.MaxValue;
+        
+        private readonly GameObject _hitEffectPrefab = Resources.Load<GameObject>("prefabs/effects/impacteffects/critspark");
+        private readonly GameObject _tracerEffectPrefab = Resources.Load<GameObject>("prefabs/effects/tracers/tracerbanditshotgun");
 
-        public GameObject effectPrefab = Resources.Load<GameObject>("prefabs/effects/impacteffects/Hitspark");
-        public GameObject hitEffectPrefab = Resources.Load<GameObject>("prefabs/effects/impacteffects/critspark");
-        public GameObject tracerEffectPrefab = Resources.Load<GameObject>("prefabs/effects/tracers/tracerbanditshotgun");
+        private List<HurtBox> _targetHurtboxes = new List<HurtBox>();
 
-        private List<HurtBox> targetHurtboxes = new List<HurtBox>();
-
-        public static int minimumFireCount = 25;
-        public int totalBulletsToFire;
-        public int totalBulletsFired;
-        private int targetHurtboxIndex;
-        public float damage = 1.3f;
+        private static int minimumFireCount = 25;
+        private int _totalBulletsToFire;
+        private int _totalBulletsFired;
+        private int _targetHurtboxIndex;
+        private float damage = 1.3f;
 
 
         public override void OnEnter()
         {
             base.OnEnter();
-            this.duration = this.baseDuration / base.attackSpeedStat;
-            this.firingDuration = this.baseDuration / this.attackSpeedStat;
-            Ray aimRay = base.GetAimRay();
-            base.characterBody.SetAimTimer(3f);
-            base.PlayAnimation("Gesture, Additive", "FireSweepBarrage", "FireSweepBarrage.playbackRate", this.baseDuration * 1.1f);
-            base.PlayAnimation("Gesture, Override", "FireSweepBarrage", "FireSweepBarrage.playbackRate", this.baseDuration * 1.1f);
-            var bullseyeSearch = new RoR2.BullseyeSearch();
-            bullseyeSearch.teamMaskFilter = TeamMask.GetEnemyTeams(base.GetTeam());
-            bullseyeSearch.filterByLoS = true;
-            bullseyeSearch.searchOrigin = aimRay.origin;
-            bullseyeSearch.searchDirection = aimRay.direction;
-            bullseyeSearch.sortMode = RoR2.BullseyeSearch.SortMode.DistanceAndAngle;
-            bullseyeSearch.maxDistanceFilter = maxDistance;
-            bullseyeSearch.maxAngleFilter = AutoShot.fieldOfView * 0.5f;
+            _duration = baseDuration / attackSpeedStat;
+            _firingDuration = baseDuration / attackSpeedStat;
+            Ray aimRay = GetAimRay();
+            characterBody.SetAimTimer(3f);
+            PlayAnimation("Gesture, Additive", "FireSweepBarrage", "FireSweepBarrage.playbackRate", baseDuration * 1.1f);
+            PlayAnimation("Gesture, Override", "FireSweepBarrage", "FireSweepBarrage.playbackRate", baseDuration * 1.1f);
+            var bullseyeSearch = new BullseyeSearch
+            {
+                teamMaskFilter = TeamMask.GetEnemyTeams(GetTeam()),
+                filterByLoS = true,
+                searchOrigin = aimRay.origin,
+                searchDirection = aimRay.direction,
+                sortMode = BullseyeSearch.SortMode.DistanceAndAngle,
+                maxDistanceFilter = maxDistance,
+                maxAngleFilter = AutoShot.fieldOfView * 0.5f
+            };
             bullseyeSearch.RefreshCandidates();
             //var hurtBox = bullseyeSearch.GetResults().FirstOrDefault();
-            this.targetHurtboxes = bullseyeSearch.GetResults().Where(new Func<HurtBox, bool>(Util.IsValid)).Distinct(default(HurtBox.EntityEqualityComparer)).ToList<HurtBox>();
-            this.totalBulletsToFire = Mathf.Max(this.targetHurtboxes.Count, minimumFireCount);
-            this.timeBetweenBullets = (this.firingDuration / (float)this.totalBulletsToFire);
+            _targetHurtboxes = bullseyeSearch.GetResults().Where(Util.IsValid).Distinct(default(HurtBox.EntityEqualityComparer)).ToList();
+            _totalBulletsToFire = Mathf.Max(_targetHurtboxes.Count, minimumFireCount);
+            _timeBetweenBullets = _firingDuration / _totalBulletsToFire;
 
         }
         private void Fire()
         {
-            if (isListEmpty(this.targetHurtboxes))
+            if (isListEmpty(_targetHurtboxes))
             {
                 return;
             }
-            if (this.totalBulletsFired < this.totalBulletsToFire)
+            if (_totalBulletsFired < _totalBulletsToFire)
             {
-                var localUser = RoR2.LocalUserManager.GetFirstLocalUser();
+                var localUser = LocalUserManager.GetFirstLocalUser();
                 var controller = localUser.cachedMasterController;
-                if (!controller)
-                    return;
+                if (!controller) return;
                 var body = controller.master.GetBody();
-                if (!body)
-                    return;
-                var inputBank = body.GetComponent<RoR2.InputBankTest>();
-                var aimRay = new Ray(inputBank.aimOrigin, inputBank.aimDirection);
+                if (!body) return;
+                var bank = body.GetComponent<InputBankTest>();
+                var aimRay = new Ray(bank.aimOrigin, bank.aimDirection);
 
-                if (this.targetHurtboxIndex >= this.targetHurtboxes.Count)
-                {
-                    this.targetHurtboxIndex = 0;
-                }
-                HurtBox hurtBox = this.targetHurtboxes[this.targetHurtboxIndex];
-                if (this.targetHurtboxes.Count > 0)
+                if (_targetHurtboxIndex >= _targetHurtboxes.Count) _targetHurtboxIndex = 0;
+                
+                HurtBox hurtBox = _targetHurtboxes[_targetHurtboxIndex];
+                if (_targetHurtboxes.Count > 0)
                 {
                     if (hurtBox)
                     {
-                        this.targetHurtboxIndex++;
+                        _targetHurtboxIndex++;
                         Vector3 direction = hurtBox.transform.position - aimRay.origin;
                         //inputBank.aimDirection = direction;
-                        HealthComponent healthComponent = hurtBox.healthComponent;
-                        if (healthComponent)
+                        HealthComponent hurtBoxHealthComponent = hurtBox.healthComponent;
+                        if (hurtBoxHealthComponent)
                         {
-                            if (base.isAuthority)
+                            if (isAuthority)
                             {
                                 new BulletAttack
                                 {
-                                    owner = base.gameObject,
-                                    weapon = base.gameObject,
+                                    owner = gameObject,
+                                    weapon = gameObject,
                                     origin = aimRay.origin,
                                     muzzleName = "MuzzleRight",
                                     aimVector = direction,
                                     minSpread = 0f,
-                                    maxSpread = base.characterBody.spreadBloomAngle,
+                                    maxSpread = characterBody.spreadBloomAngle,
                                     bulletCount = 1U,
                                     procCoefficient = AutoShotPlugin.procCoefficient.Value,
-                                    damage = base.characterBody.damage * damage,
+                                    damage = characterBody.damage * damage,
                                     force = 3,
                                     falloffModel = BulletAttack.FalloffModel.DefaultBullet,
-                                    tracerEffectPrefab = this.tracerEffectPrefab,
-                                    hitEffectPrefab = this.hitEffectPrefab,
-                                    isCrit = base.RollCrit(),
+                                    tracerEffectPrefab = _tracerEffectPrefab,
+                                    hitEffectPrefab = _hitEffectPrefab,
+                                    isCrit = RollCrit(),
                                     HitEffectNormal = false,
                                     damageType = DamageType.IgniteOnHit | DamageType.Stun1s,
                                     stopperMask = LayerIndex.world.mask,
@@ -120,27 +117,28 @@ namespace AutoShot
                     }
                 }
                 //Debug.Log("Bullet " + totalBulletsFired);
-                this.totalBulletsFired++;
+                _totalBulletsFired++;
             }
 
         }
+
         public override void OnExit()
         {
             base.OnExit();
         }
+        
         public override void FixedUpdate()
         {
             base.FixedUpdate();
-            this.fireTimer -= Time.fixedDeltaTime;
-            if (this.fireTimer <= 0f)
+            _fireTimer -= Time.fixedDeltaTime;
+            if (_fireTimer <= 0f)
             {
-                this.Fire();
-                this.fireTimer += this.timeBetweenBullets;
+                Fire();
+                _fireTimer += _timeBetweenBullets;
             }
-            if (base.fixedAge >= this.duration && base.isAuthority)
+            if (fixedAge >= _duration && isAuthority)
             {
-                this.outer.SetNextStateToMain();
-                return;
+                outer.SetNextStateToMain();
             }
         }
         public bool isListEmpty(List<HurtBox> list)

@@ -21,7 +21,7 @@ namespace AutoShot
             MODNAME = "AutoShot",
             AUTHOR = "lodington",
             GUID = "com." + AUTHOR + "." + MODNAME,
-            VERSION = "1.0.2";
+            VERSION = "1.2.0";
 
 		public static ConfigEntry<float> damageCoefficient { get; set; }
 		public static ConfigEntry<int> minimumFireCount { get; set; }
@@ -40,14 +40,13 @@ namespace AutoShot
 		private void Awake() //Called when loaded by BepInEx.
         {
 			var path = System.IO.Path.GetDirectoryName(Info.Location);
-			_assets = AssetBundle.LoadFromFile(System.IO.Path.Combine(path, "aeroltbundle"));
+			_assets = AssetBundle.LoadFromFile(System.IO.Path.Combine(path, "commandoskills"));
 
-			damageCoefficient = Config.Bind<float>("Damage Coefficient", "Damage Coefficient", 0.9f, "This Will set Damage Coefficient of Sweeping Barrage Skill Default Value is 0.9f");
-			minimumFireCount = Config.Bind<int>("minimum Fire Count", "minimum Fire Count", 10, "The minimum amount of times Sweeping barrage will shoot at targets less than X amount of enemys in range.");
-			procCoefficient = Config.Bind<float>("Proc CoEfficient", "Proc CoEfficient", 1.0f, "This Will set proc Coefficient of Sweeping Barrage Skill Default Value is 1.0f");
+			damageCoefficient = Config.Bind("Damage Coefficient", "Damage Coefficient", 0.9f, "This Will set Damage Coefficient of Sweeping Barrage Skill Default Value is 0.9f");
+			minimumFireCount = Config.Bind("minimum Fire Count", "minimum Fire Count", 10, "The minimum amount of times Sweeping barrage will shoot at targets less than X amount of enemys in range.");
+			procCoefficient = Config.Bind("Proc CoEfficient", "Proc CoEfficient", 1.0f, "This Will set proc Coefficient of Sweeping Barrage Skill Default Value is 1.0f");
 
 			setupAutoShot();
-
 			if (BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("com.ThinkInvisible.ClassicItems"))
 			{
 				ScepterSkillSetup();
@@ -75,11 +74,11 @@ namespace AutoShot
 			AUTO_SHOT.requiredStock = 1;
 			AUTO_SHOT.cancelSprintingOnActivation = true; 
 			AUTO_SHOT.stockToConsume = 1;
-			AUTO_SHOT.icon = Resources.Load<Sprite>("@commandoskills:Assets/SWEEPING_BARRAGE.png");
+			AUTO_SHOT.icon = _assets.LoadAsset<Sprite>("SWEEPING_BARRAGE");
 
 			LoadoutAPI.AddSkillDef(AUTO_SHOT);
 			SkillFamily skillFamily = skillLocator.special.skillFamily;
-			Array.Resize<SkillFamily.Variant>(ref skillFamily.variants, skillFamily.variants.Length + 1);
+			Array.Resize(ref skillFamily.variants, skillFamily.variants.Length + 1);
 
 			skillFamily.variants[skillFamily.variants.Length - 1] = new SkillFamily.Variant
 			{
@@ -87,13 +86,11 @@ namespace AutoShot
 				unlockableName = "",
 				viewableNode = new ViewablesCatalog.Node(AUTO_SHOT.skillNameToken, false, null)
 			};
-
-		}
+        }
 
 		private void ScepterSkillSetup()
         {
-
-			AUTO_SHOT_SCEPTER = ScriptableObject.CreateInstance<SkillDef>();
+	        AUTO_SHOT_SCEPTER = ScriptableObject.CreateInstance<SkillDef>();
 			AUTO_SHOT_SCEPTER.activationState = new SerializableEntityStateType(typeof(BulletHell));
 			AUTO_SHOT_SCEPTER.skillNameToken = "Bullet Hell";
 			AUTO_SHOT_SCEPTER.skillName = "C_AUTO_SHOT_SCEPTER";
@@ -112,7 +109,7 @@ namespace AutoShot
 			AUTO_SHOT_SCEPTER.requiredStock = 1;
 			//AUTO_SHOT_SCEPTER.shootDelay = 1f;
 			AUTO_SHOT_SCEPTER.stockToConsume = 1;
-			AUTO_SHOT_SCEPTER.icon = Resources.Load<Sprite>("@commandoskills:Assets/SWEEPING_BARRAGE_SCEPTER.png");
+			AUTO_SHOT_SCEPTER.icon = _assets.LoadAsset<Sprite>("SWEEPING_BARRAGE_SCEPTER");
 
 			LoadoutAPI.AddSkillDef(AUTO_SHOT_SCEPTER);
 		}
