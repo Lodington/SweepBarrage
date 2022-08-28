@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using EntityStates.Commando.CommandoWeapon;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -12,28 +13,32 @@ namespace AutoShot
 	public class AutoShot : BaseState
 	{
         public float baseDuration = 1.3f;
-        private float _duration;
-        private float _fireTimer;
+        public float duration;
+        public float fireTimer;
         public float timeBetweenBullets;
-        private float _firingDuration;
-        public static float fieldOfView = 100;
-        public float maxDistance = 150;
+        public float firingDuration;
+        public virtual float FieldOfView => 100;
+        public virtual float MAXDistance => 150;
+        public virtual DamageType DamageType => DamageType.Stun1s;
         
-        public GameObject hitEffectPrefab = Resources.Load<GameObject>("prefabs/effects/impacteffects/critspark");
-        public GameObject tracerEffectPrefab = Resources.Load<GameObject>("prefabs/effects/tracers/tracerbanditshotgun");
+        public static GameObject hitEffectPrefab = Resources.Load<GameObject>("prefabs/effects/impacteffects/critspark");
+        public static GameObject tracerEffectPrefab = Resources.Load<GameObject>("prefabs/effects/tracers/tracerbanditshotgun");
 
         private List<HurtBox> _targetHurtboxes = new List<HurtBox>();
 
-        public static int minimumFireCount = AutoShotPlugin.minimumFireCount.Value;
+        public virtual int MinimumFireCount => AutoShotPlugin.minimumFireCount.Value;
+        public virtual float Damage => AutoShotPlugin.damageCoefficient.Value;
+        public virtual float RecoilAmplitude => 2f;
         public int totalBulletsToFire;
         public int totalBulletsFired;
         private int _targetHurtboxIndex;
+        private bool _hasSuccessfullyFoundTarget;
 
         public override void OnEnter()
         {
             base.OnEnter();
-            _duration = baseDuration / attackSpeedStat;
-            _firingDuration = baseDuration / attackSpeedStat;
+            duration = baseDuration / attackSpeedStat;
+            firingDuration = baseDuration / attackSpeedStat;
             Ray aimRay = GetAimRay();
             characterBody.SetAimTimer(3f);
             PlayAnimation("Gesture, Additive", "FireSweepBarrage", "FireSweepBarrage.playbackRate", baseDuration * 1.1f);
@@ -45,15 +50,14 @@ namespace AutoShot
                 searchOrigin = aimRay.origin,
                 searchDirection = aimRay.direction,
                 sortMode = BullseyeSearch.SortMode.DistanceAndAngle,
-                maxDistanceFilter = maxDistance,
-                maxAngleFilter = fieldOfView * 0.5f
+                maxDistanceFilter = MAXDistance,
+                maxAngleFilter = FieldOfView * 0.5f
             };
             bullseyeSearch.RefreshCandidates();
             //var hurtBox = bullseyeSearch.GetResults().FirstOrDefault();
             _targetHurtboxes = bullseyeSearch.GetResults().Where(Util.IsValid).Distinct(default(HurtBox.EntityEqualityComparer)).ToList();
-            totalBulletsToFire = Mathf.Max(_targetHurtboxes.Count, minimumFireCount);
-            timeBetweenBullets = _firingDuration / totalBulletsToFire;
-
+            totalBulletsToFire = Mathf.Max(_targetHurtboxes.Count, MinimumFireCount);
+            timeBetweenBullets = firingDuration / totalBulletsToFire;
         }
         private void Fire()
         {
@@ -68,15 +72,18 @@ namespace AutoShot
                 var inputBankTest = body.GetComponent<InputBankTest>();
                 var aimRay = new Ray(inputBankTest.aimOrigin, inputBankTest.aimDirection);
 
+                AddRecoil(-0.8f * RecoilAmplitude, -1f * RecoilAmplitude, -0.1f * RecoilAmplitude, 0.15f * RecoilAmplitude);
+                
                 if (_targetHurtboxIndex >= _targetHurtboxes.Count) _targetHurtboxIndex = 0;
                 HurtBox hurtBox = _targetHurtboxes[_targetHurtboxIndex];
                 
                 if (_targetHurtboxes.Count > 0)
                     if (hurtBox)
                     {
+                        _hasSuccessfullyFoundTarget = true;
                         _targetHurtboxIndex++;
                         Vector3 direction = hurtBox.transform.position - aimRay.origin;
-                        //inputBank.aimDirection = direction;
+                        inputBank.aimDirection = direction;
                         HealthComponent boxHealthComponent = hurtBox.healthComponent;
                         if (boxHealthComponent)
                             if (isAuthority)
@@ -91,20 +98,21 @@ namespace AutoShot
                                     maxSpread = characterBody.spreadBloomAngle,
                                     bulletCount = 1U,
                                     procCoefficient = AutoShotPlugin.procCoefficient.Value,
-                                    damage = characterBody.damage * AutoShotPlugin.damageCoefficient.Value,
+                                    damage = characterBody.damage * Damage,
                                     force = 3,
                                     falloffModel = BulletAttack.FalloffModel.DefaultBullet,
                                     tracerEffectPrefab = tracerEffectPrefab,
                                     hitEffectPrefab = hitEffectPrefab,
                                     isCrit = RollCrit(),
                                     HitEffectNormal = false,
-                                    damageType = DamageType.Stun1s,
+                                    damageType = DamageType,
                                     stopperMask = LayerIndex.world.mask,
                                     smartCollision = true,
-                                    maxDistance = maxDistance
+                                    maxDistance = MAXDistance
                                 }.Fire();
+                        Util.PlaySound(FireBarrage.fireBarrageSoundString, gameObject);
+                        characterBody.AddSpreadBloom(FireBarrage.spreadBloomValue);
                     }
-
                 //Debug.Log("Bullet " + totalBulletsFired);
                 totalBulletsFired++;
             }
@@ -113,17 +121,18 @@ namespace AutoShot
         public override void OnExit()
         {
             base.OnExit();
+            if (!_hasSuccessfullyFoundTarget && NetworkServer.active) skillLocator.special.AddOneStock();
         }
         public override void FixedUpdate()
         {
             base.FixedUpdate();
-            _fireTimer -= Time.fixedDeltaTime;
-            if (_fireTimer <= 0f)
+            fireTimer -= Time.fixedDeltaTime;
+            if (fireTimer <= 0f)
             {
                 Fire();
-                _fireTimer += timeBetweenBullets;
+                fireTimer += timeBetweenBullets;
             }
-            if (fixedAge >= _duration && isAuthority) outer.SetNextStateToMain();
+            if (fixedAge >= duration && isAuthority) outer.SetNextStateToMain();
         }
         public bool isListEmpty(List<HurtBox> list) => !list.Any();
         public override InterruptPriority GetMinimumInterruptPriority() => InterruptPriority.Death;

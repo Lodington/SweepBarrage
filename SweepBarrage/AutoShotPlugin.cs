@@ -115,11 +115,8 @@ namespace AutoShot
 		}
 
 		[MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
-		private void ScepterSetup()
-		{
+		private void ScepterSetup() =>
 			ThinkInvisible.ClassicItems.Scepter.instance.RegisterScepterSkill(AUTO_SHOT_SCEPTER, "CommandoBody",
 				SkillSlot.Special, AUTO_SHOT);
-		}
-		
-	}
+    }
 }
