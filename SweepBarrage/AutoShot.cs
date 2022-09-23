@@ -12,13 +12,13 @@ namespace AutoShot
 {
 	public class AutoShot : BaseState
 	{
-        public float baseDuration = 1.3f;
-        public float duration;
-        public float fireTimer;
-        public float timeBetweenBullets;
-        public float firingDuration;
+        public float BaseDuration = 1.3f;
+        public float Duration;
+        public float FireTimer;
+        public float TimeBetweenBullets;
+        public float FiringDuration;
         public virtual float FieldOfView => 100;
-        public virtual float MAXDistance => 150;
+        public virtual float MaxDistance => 150;
         public virtual DamageType DamageType => DamageType.Stun1s;
         
         public static GameObject hitEffectPrefab = Resources.Load<GameObject>("prefabs/effects/impacteffects/critspark");
@@ -26,23 +26,23 @@ namespace AutoShot
 
         private List<HurtBox> _targetHurtboxes = new List<HurtBox>();
 
-        public virtual int MinimumFireCount => AutoShotPlugin.minimumFireCount.Value;
-        public virtual float Damage => AutoShotPlugin.damageCoefficient.Value;
+        public virtual int MinimumFireCount => AutoShotPlugin.MinimumFireCount.Value;
+        public virtual float Damage => AutoShotPlugin.DamageCoefficient.Value;
         public virtual float RecoilAmplitude => 2f;
-        public int totalBulletsToFire;
-        public int totalBulletsFired;
+        public int TotalBulletsToFire;
+        public int TotalBulletsFired;
         private int _targetHurtboxIndex;
         private bool _hasSuccessfullyFoundTarget;
 
         public override void OnEnter()
         {
             base.OnEnter();
-            duration = baseDuration / attackSpeedStat;
-            firingDuration = baseDuration / attackSpeedStat;
+            Duration = BaseDuration / attackSpeedStat;
+            FiringDuration = BaseDuration / attackSpeedStat;
             Ray aimRay = GetAimRay();
             characterBody.SetAimTimer(3f);
-            PlayAnimation("Gesture, Additive", "FireSweepBarrage", "FireSweepBarrage.playbackRate", baseDuration * 1.1f);
-            PlayAnimation("Gesture, Override", "FireSweepBarrage", "FireSweepBarrage.playbackRate", baseDuration * 1.1f);
+            PlayAnimation("Gesture, Additive", "FireSweepBarrage", "FireSweepBarrage.playbackRate", BaseDuration * 1.1f);
+            PlayAnimation("Gesture, Override", "FireSweepBarrage", "FireSweepBarrage.playbackRate", BaseDuration * 1.1f);
             var bullseyeSearch = new BullseyeSearch
             {
                 teamMaskFilter = TeamMask.GetEnemyTeams(GetTeam()),
@@ -50,19 +50,19 @@ namespace AutoShot
                 searchOrigin = aimRay.origin,
                 searchDirection = aimRay.direction,
                 sortMode = BullseyeSearch.SortMode.DistanceAndAngle,
-                maxDistanceFilter = MAXDistance,
+                maxDistanceFilter = MaxDistance,
                 maxAngleFilter = FieldOfView * 0.5f
             };
             bullseyeSearch.RefreshCandidates();
             //var hurtBox = bullseyeSearch.GetResults().FirstOrDefault();
             _targetHurtboxes = bullseyeSearch.GetResults().Where(Util.IsValid).Distinct(default(HurtBox.EntityEqualityComparer)).ToList();
-            totalBulletsToFire = Mathf.Max(_targetHurtboxes.Count, MinimumFireCount);
-            timeBetweenBullets = firingDuration / totalBulletsToFire;
+            TotalBulletsToFire = Mathf.Max(_targetHurtboxes.Count, MinimumFireCount);
+            TimeBetweenBullets = FiringDuration / TotalBulletsToFire;
         }
         private void Fire()
         {
             if (isListEmpty(_targetHurtboxes)) return;
-            if (totalBulletsFired < totalBulletsToFire)
+            if (TotalBulletsFired < TotalBulletsToFire)
             {
                 var localUser = LocalUserManager.GetFirstLocalUser();
                 var controller = localUser.cachedMasterController;
@@ -97,7 +97,7 @@ namespace AutoShot
                                     minSpread = 0f,
                                     maxSpread = characterBody.spreadBloomAngle,
                                     bulletCount = 1U,
-                                    procCoefficient = AutoShotPlugin.procCoefficient.Value,
+                                    procCoefficient = AutoShotPlugin.ProcCoefficient.Value,
                                     damage = characterBody.damage * Damage,
                                     force = 3,
                                     falloffModel = BulletAttack.FalloffModel.DefaultBullet,
@@ -108,13 +108,13 @@ namespace AutoShot
                                     damageType = DamageType,
                                     stopperMask = LayerIndex.world.mask,
                                     smartCollision = true,
-                                    maxDistance = MAXDistance
+                                    maxDistance = MaxDistance
                                 }.Fire();
                         Util.PlaySound(FireBarrage.fireBarrageSoundString, gameObject);
                         characterBody.AddSpreadBloom(FireBarrage.spreadBloomValue);
                     }
                 //Debug.Log("Bullet " + totalBulletsFired);
-                totalBulletsFired++;
+                TotalBulletsFired++;
             }
           
         }
@@ -126,13 +126,13 @@ namespace AutoShot
         public override void FixedUpdate()
         {
             base.FixedUpdate();
-            fireTimer -= Time.fixedDeltaTime;
-            if (fireTimer <= 0f)
+            FireTimer -= Time.fixedDeltaTime;
+            if (FireTimer <= 0f)
             {
                 Fire();
-                fireTimer += timeBetweenBullets;
+                FireTimer += TimeBetweenBullets;
             }
-            if (fixedAge >= duration && isAuthority) outer.SetNextStateToMain();
+            if (fixedAge >= Duration && isAuthority) outer.SetNextStateToMain();
         }
         public bool isListEmpty(List<HurtBox> list) => !list.Any();
         public override InterruptPriority GetMinimumInterruptPriority() => InterruptPriority.Death;
