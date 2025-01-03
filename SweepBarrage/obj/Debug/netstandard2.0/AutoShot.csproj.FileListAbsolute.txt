@@ -123,3 +123,13 @@ C:/Users/tyler/RiderProjects/SweepBarrage/SweepBarrage/obj/Debug/netstandard2.0/
 /home/lodington/Documents/Repos/SweepBarrage/SweepBarrage/obj/Debug/netstandard2.0/AutoShot.csproj.CopyComplete
 /home/lodington/Documents/Repos/SweepBarrage/SweepBarrage/obj/Debug/netstandard2.0/AutoShot.dll
 /home/lodington/Documents/Repos/SweepBarrage/SweepBarrage/obj/Debug/netstandard2.0/AutoShot.pdb
+C:\Users\Lodington\RiderProjects\SweepBarrage\SweepBarrage\obj\Debug\netstandard2.0\AutoShot.csproj.AssemblyReference.cache
+C:\Users\Lodington\RiderProjects\SweepBarrage\SweepBarrage\obj\Debug\netstandard2.0\AutoShot.Properties.Resources.resources
+C:\Users\Lodington\RiderProjects\SweepBarrage\SweepBarrage\obj\Debug\netstandard2.0\AutoShot.csproj.GenerateResource.cache
+C:\Users\Lodington\RiderProjects\SweepBarrage\SweepBarrage\obj\Debug\netstandard2.0\AutoShot.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Lodington\RiderProjects\SweepBarrage\SweepBarrage\obj\Debug\netstandard2.0\AutoShot.AssemblyInfoInputs.cache
+C:\Users\Lodington\RiderProjects\SweepBarrage\SweepBarrage\obj\Debug\netstandard2.0\AutoShot.AssemblyInfo.cs
+C:\Users\Lodington\RiderProjects\SweepBarrage\SweepBarrage\obj\Debug\netstandard2.0\AutoShot.csproj.CoreCompileInputs.cache
+C:\Users\Lodington\RiderProjects\SweepBarrage\SweepBarrage\obj\Debug\netstandard2.0\AutoShot.sourcelink.json
+C:\Users\Lodington\RiderProjects\SweepBarrage\SweepBarrage\obj\Debug\netstandard2.0\AutoShot.dll
+C:\Users\Lodington\RiderProjects\SweepBarrage\SweepBarrage\obj\Debug\netstandard2.0\AutoShot.pdb
